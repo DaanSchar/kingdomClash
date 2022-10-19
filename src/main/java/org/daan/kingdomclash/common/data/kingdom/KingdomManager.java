@@ -5,8 +5,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
 import net.minecraft.server.level.*;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.daan.kingdomclash.common.network.PacketHandler;
@@ -22,6 +22,8 @@ public class KingdomManager extends SavedData {
     private final HashMap<String, Kingdom> kingdoms = new HashMap<>();
 
     private int counter = 0;
+
+    private static final List<Class<? extends Block>> blocks = new ArrayList<>();
 
     @Nonnull
     public static KingdomManager get(Level level) {
@@ -125,12 +127,12 @@ public class KingdomManager extends SavedData {
         return Optional.empty();
     }
 
-    public Optional<Kingdom> getKingdom(BlockPos crystalPos) {
+    public Optional<Kingdom> getKingdom(Class<?> blockClass, BlockPos pos) {
         for (Kingdom kingdom : kingdoms.values()) {
-            var kingdomCrystalPos = kingdom.getCrystalPosition();
+            var kingdomBlockPos = kingdom.getBlockPos(blockClass);
 
-            if (kingdomCrystalPos.isPresent()) {
-                if (kingdomCrystalPos.get().equals(crystalPos)) {
+            if (kingdomBlockPos.isPresent()) {
+                if (kingdomBlockPos.get().equals(pos)) {
                     return Optional.of(kingdom);
                 }
             }
@@ -156,11 +158,6 @@ public class KingdomManager extends SavedData {
         return false;
     }
 
-    public void setCrystalPosition(@Nonnull Kingdom kingdom, BlockPos pos) {
-        kingdom.setCrystalPosition(pos);
-        setDirty();
-    }
-
     public void incrementLives(@Nonnull Kingdom kingdom, int total) {
         kingdom.setLives(kingdom.getLives() + total);
         setDirty();
@@ -173,6 +170,42 @@ public class KingdomManager extends SavedData {
     public void setColor(@Nonnull Kingdom kingdom, ChatFormatting color) {
         kingdom.setColor(color);
         setDirty();
+    }
+
+    public void setLives(Kingdom kingdom, int lives) {
+        kingdom.setLives(lives);
+        setDirty();
+    }
+
+    public void setBlockPos(Class<? extends Block> blockClass, @Nonnull Kingdom kingdom, BlockPos pos) {
+        kingdom.setBlockPos(blockClass, pos);
+        setDirty();
+    }
+
+    public void removeBlock(Class<? extends Block> blockClass, @Nonnull Kingdom kingdom) {
+        setBlockPos(blockClass, kingdom,  null);
+    }
+
+    public static void register(Class<? extends Block> blockClass) {
+        blocks.add(blockClass);
+    }
+
+    public static Optional<Class<? extends Block>> getBlockClass(String blockClassName) {
+        for (Class<? extends Block> blockClass : blocks) {
+            if (blockClass.getSimpleName().equals(blockClassName)) {
+                return Optional.of(blockClass);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public static List<Class<? extends Block>> getBlockClasses() {
+        return blocks;
+    }
+
+    public static boolean isKingdomBlock(Block block) {
+        return blocks.contains(block.getClass());
     }
 
     private void updatePlayer(ServerPlayer player) {
@@ -189,10 +222,5 @@ public class KingdomManager extends SavedData {
                 PacketHandler.sendToPlayer(new SPacketSyncMemberDataToClient(kingdom.getName(), member), player);
             }
         }
-    }
-
-    public void setLives(Kingdom kingdom, int lives) {
-        kingdom.setLives(lives);
-        setDirty();
     }
 }

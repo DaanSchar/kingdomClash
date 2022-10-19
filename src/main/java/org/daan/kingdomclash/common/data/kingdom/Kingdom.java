@@ -3,27 +3,30 @@ package org.daan.kingdomclash.common.data.kingdom;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.daan.kingdomclash.common.Messenger;
 import org.daan.kingdomclash.server.config.ServerConfig;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Kingdom {
 
-    private BlockPos crystalPosition;
     private String name;
     private GameProfile Leader;
     private Set<GameProfile> members;
     private int lives;
     private Vec3 spawnPoint;
     private ChatFormatting color;
+    private final HashMap<Class<?>, BlockPos> blocks;
 
     public Kingdom(String name) {
         this.name = name;
         this.members = new HashSet<>();
         this.lives = ServerConfig.KINGDOM_START_LIVES.get();
         this.color = ChatFormatting.WHITE;
+        blocks = new HashMap<>();
     }
 
     public String getName() {
@@ -46,6 +49,14 @@ public class Kingdom {
         return members;
     }
 
+    public Collection<Player> getPlayers(Level level) {
+        if (level.isClientSide()) {
+            return new ArrayList<>();
+        }
+
+        return members.stream().map(GameProfile::getId).map(level::getPlayerByUUID).collect(Collectors.toList());
+    }
+
     public void setMembers(Set<GameProfile> members) {
         this.members = members;
     }
@@ -54,12 +65,12 @@ public class Kingdom {
         this.members.add(player);
     }
 
-    public void setCrystalPosition(BlockPos crystalPosition) {
-        this.crystalPosition = crystalPosition;
+    public Optional<BlockPos> getBlockPos(Class<?> blockClass) {
+        return Optional.ofNullable(this.blocks.get(blockClass));
     }
 
-    public Optional<BlockPos> getCrystalPosition() {
-        return Optional.ofNullable(crystalPosition);
+    public void setBlockPos(Class<?> blockClass, BlockPos pos) {
+        this.blocks.put(blockClass, pos);
     }
 
     public int getLives() {

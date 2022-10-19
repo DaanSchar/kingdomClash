@@ -8,10 +8,11 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.daan.kingdomclash.common.*;
-import org.daan.kingdomclash.common.block.ModBlocks;
+import org.daan.kingdomclash.common.block.powercrystal.PowerCrystal;
 import org.daan.kingdomclash.common.data.kingdom.*;
 import org.daan.kingdomclash.common.network.PacketHandler;
 import org.daan.kingdomclash.common.network.packets.kingdom.*;
+import org.daan.kingdomclash.index.KCBlocks;
 
 import java.util.Optional;
 
@@ -27,7 +28,8 @@ public class KingdomBreakCrystalEvent {
         var world = event.getWorld();
         var block = event.getWorld().getBlockState(event.getPos()).getBlock();
 
-        if (world.isClientSide() || !block.equals(ModBlocks.POWER_CRYSTAL_BLOCK.get())) {
+
+        if (world.isClientSide() || !block.equals(KCBlocks.POWER_CRYSTAL.get())) {
             return;
         }
 
@@ -70,7 +72,7 @@ public class KingdomBreakCrystalEvent {
     private static void handleBlockBreak(BlockEvent.BreakEvent event, Kingdom kingdomOfPlayer) {
         Player player = event.getPlayer();
         KingdomManager manager = KingdomManager.get(player.level);
-        manager.getKingdom(event.getPos()).ifPresentOrElse(
+        manager.getKingdom(PowerCrystal.class, event.getPos()).ifPresentOrElse(
                 kingdomOfBlock -> {
                     if (!kingdomOfBlock.equals(kingdomOfPlayer)) {
                         handleEnemyBreakCrystal(event, kingdomOfBlock);
@@ -100,7 +102,7 @@ public class KingdomBreakCrystalEvent {
     private static void handleEnemyBreakCrystalToDeath(BlockEvent.BreakEvent event, Kingdom kingdom) {
         KingdomManager manager = KingdomManager.get(event.getPlayer().level);
         event.setCanceled(false);
-        manager.setCrystalPosition(kingdom, null);
+        manager.setBlockPos(PowerCrystal.class, kingdom, null);
         toggleExplosion(true);
     }
 
@@ -109,9 +111,9 @@ public class KingdomBreakCrystalEvent {
         KingdomManager manager = KingdomManager.get(player.level);
 
         if (player.isCreative()) {
-            Messenger.sendClientSuccess(player, "Removed crystal from kingdom");
+            Messenger.sendClientSuccess(player, "Removed PowerCrystal from " + kingdom.getName());
             event.setCanceled(false);
-            manager.setCrystalPosition(kingdom, null);
+            manager.setBlockPos(PowerCrystal.class, kingdom, null);
         } else {
             Messenger.sendClientError(player, "Can't break your own kingdom's block");
         }

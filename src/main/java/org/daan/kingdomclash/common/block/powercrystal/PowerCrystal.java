@@ -1,4 +1,4 @@
-package org.daan.kingdomclash.common.block.custom;
+package org.daan.kingdomclash.common.block.powercrystal;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 
-public class PowerCrystalBlock extends Block {
+public class PowerCrystal extends Block {
 
-    public PowerCrystalBlock(Properties properties) {
+    public PowerCrystal(Properties properties) {
         super(properties);
     }
 

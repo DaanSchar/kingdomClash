@@ -12,31 +12,38 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.daan.kingdomclash.common.*;
-import org.daan.kingdomclash.common.block.ModBlocks;
+import org.daan.kingdomclash.common.block.transformer.MechanicalBeacon;
 import org.daan.kingdomclash.common.data.kingdom.*;
 import org.daan.kingdomclash.common.network.PacketHandler;
 import org.daan.kingdomclash.common.network.packets.kingdom.*;
-import org.slf4j.Logger;
+import org.daan.kingdomclash.index.KCBlocks;
 
 import java.util.Optional;
 
 @Mod.EventBusSubscriber(modid = KingdomClash.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class KingdomEvents {
 
-    private static final Logger log = KingdomClash.LOGGER;
     @SubscribeEvent
-    public static void onPlaceBlock(BlockEvent.EntityPlaceEvent event) {
+    public static void onBreakBlock(BlockEvent.BreakEvent event) {
         var world = event.getWorld();
-        var block = event.getPlacedBlock().getBlock();
+        var block = event.getWorld().getBlockState(event.getPos()).getBlock();
 
-        if (world.isClientSide()) {
+        if (world.isClientSide() || !block.equals(KCBlocks.MECHANICAL_BEACON.get())) {
             return;
         }
 
-        if (event.getEntity() instanceof Player player) {
-            if (block.equals(ModBlocks.POWER_CRYSTAL_BLOCK.get())) {
-                handleCrystalPlacement(event, player);
-            }
+        Player player = event.getPlayer();
+
+        if (player.isCreative()) {
+            KingdomManager.get(player.level).getKingdom(MechanicalBeacon.class, event.getPos()).ifPresent(
+                    kingdom -> Messenger.sendClientSuccess(
+                            player,
+                            "Removed Transformer from " + kingdom.getName()
+                    )
+            );
+        } else {
+            Messenger.sendClientError(player, "You can not break a Transformer");
+            event.setCanceled(true);
         }
     }
 
@@ -123,19 +130,6 @@ public class KingdomEvents {
                             event.getPlayer().teleportTo(spawnPos.x, spawnPos.y, spawnPos.z);
                         });
                     }
-                }
-        );
-    }
-
-    private static void handleCrystalPlacement(BlockEvent.EntityPlaceEvent event, Player player) {
-        getKingdom(player).ifPresentOrElse(
-                kingdom -> {
-                    KingdomManager.get(player.getLevel()).setCrystalPosition(kingdom, event.getPos());
-                    Messenger.sendClientSuccess(player, "Added crystal to " + kingdom.getName());
-                },
-                () -> {
-                    Messenger.sendClientError(player, "You are not in a kingdom");
-                    event.setCanceled(true);
                 }
         );
     }

@@ -1,6 +1,5 @@
 package org.daan.kingdomclash.common.network.packets.kingdom;
 
-import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,7 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import org.daan.kingdomclash.client.data.ClientKingdomData;
-import org.daan.kingdomclash.common.data.kingdom.Kingdom;
+import org.daan.kingdomclash.common.block.powercrystal.PowerCrystal;
 
 import java.util.Random;
 import java.util.function.Supplier;
@@ -45,7 +44,7 @@ public class SPacketMemberDied {
                                             player.playSound(SoundEvents.LIGHTNING_BOLT_THUNDER, 0.1f, 1f);
                                         }
 
-                                        ClientKingdomData.getKingdom(this.kingdomName).flatMap(Kingdom::getCrystalPosition).ifPresent(
+                                        ClientKingdomData.getKingdom(this.kingdomName).flatMap(kingdom -> kingdom.getBlockPos(PowerCrystal.class)).ifPresent(
                                                 crystalPos -> {
                                                     player.getLevel().playSound(
                                                             player,

@@ -5,21 +5,21 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
 public class KingdomNBT {
 
-    public static ListTag save(Kingdom kingdom)  {
+    public static ListTag save(Kingdom kingdom) {
         ListTag tag = new ListTag();
 
         CompoundTag infoTag = new CompoundTag();
         infoTag.putString("kingdomName", kingdom.getName());
         infoTag.putInt("lives", kingdom.getLives());
         infoTag.putString("color", kingdom.getColor().getName());
-
-        saveBlockPos(kingdom.getCrystalPosition(), "crystalPos",infoTag);
+        saveBlocks(kingdom, infoTag);
         savePosition(kingdom.getSpawnPoint(), "spawnPoint", infoTag);
 
         tag.add(infoTag);
@@ -33,14 +33,23 @@ public class KingdomNBT {
         Kingdom kingdom = new Kingdom(infoTag.getString("kingdomName"));
 
         kingdom.setSpawnPoint(loadPosition(infoTag, "spawnPoint"));
-        kingdom.setCrystalPosition(loadBlockPos(infoTag, "crystalPos"));
         kingdom.setLives(infoTag.getInt("lives"));
         kingdom.setColor(ChatFormatting.getByName(infoTag.getString("color")));
         kingdom.setMembers(loadMembers(kingdomTag));
+        loadBlocks(kingdom, infoTag);
 
         return kingdom;
     }
 
+    private static void saveBlocks(Kingdom kingdom, CompoundTag infoTag) {
+        for (Class<? extends Block> blockClass : KingdomManager.getBlockClasses()) {
+            saveBlockPos(
+                    kingdom.getBlockPos(blockClass),
+                    blockClass.getSimpleName(),
+                    infoTag
+            );
+        }
+    }
 
     private static void saveBlockPos(Optional<BlockPos> block, String name, CompoundTag tag) {
         block.ifPresentOrElse(
@@ -70,7 +79,11 @@ public class KingdomNBT {
     private static void saveBlockPosition(BlockPos position, String name, CompoundTag tag) {
         tag.putIntArray(
                 name,
-                new int[]{position.getX(), position.getY(), position.getZ()}
+                new int[]{
+                        position.getX(),
+                        position.getY(),
+                        position.getZ()
+                }
         );
     }
 
@@ -131,6 +144,20 @@ public class KingdomNBT {
         }
 
         return members;
+    }
+
+    private static void loadBlocks(Kingdom kingdom, CompoundTag infoTag) {
+        infoTag.getAllKeys().forEach(
+                key -> {
+                    var clazz = KingdomManager.getBlockClass(key);
+
+                    clazz.ifPresent(
+                            blockClass -> {
+                                kingdom.setBlockPos(blockClass, loadBlockPos(infoTag, blockClass.getSimpleName()));
+                            }
+                    );
+                }
+        );
     }
 
 }

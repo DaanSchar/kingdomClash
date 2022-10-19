@@ -1,6 +1,8 @@
 package org.daan.kingdomclash.common;
 
 import com.mojang.logging.LogUtils;
+import com.simibubi.create.foundation.data.CreateRegistrate;
+import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -14,12 +16,11 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.daan.kingdomclash.common.block.ModBlocks;
+import org.daan.kingdomclash.index.KCTileEntities;
 import org.daan.kingdomclash.common.data.DataEvents;
-import org.daan.kingdomclash.common.effects.ModEffects;
 import org.daan.kingdomclash.common.network.PacketHandler;
+import org.daan.kingdomclash.index.KCBlocks;
 import org.daan.kingdomclash.server.config.ServerConfig;
-import org.daan.kingdomclash.common.item.ModItems;
 import org.slf4j.Logger;
 
 import java.util.stream.Collectors;
@@ -32,13 +33,15 @@ public class KingdomClash
 
     public static final Logger LOGGER = LogUtils.getLogger();
 
+    private static final NonNullSupplier<CreateRegistrate> registrate = CreateRegistrate.lazy(MOD_ID);
+
     public KingdomClash()
     {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        ModBlocks.register(eventBus);
-        ModItems.register(eventBus);
-        ModEffects.register(eventBus);
+//        ModBlocks.register(eventBus);
+//        ModItems.register(eventBus);
+//        ModEffects.register(eventBus);
 
         eventBus.addListener(this::setup);
         eventBus.addListener(this::enqueueIMC);
@@ -55,6 +58,8 @@ public class KingdomClash
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+        KCBlocks.register();
+        KCTileEntities.register();
     }
 
     private void setup(final FMLCommonSetupEvent event)
@@ -80,5 +85,9 @@ public class KingdomClash
         LOGGER.info("HELLO from server starting");
     }
 
+    public static CreateRegistrate registrate() {
+        LogUtils.getLogger().info("BRO WE ARE DOING THIS REGISTRATE THING");
+        return registrate.get();
+    }
 
 }

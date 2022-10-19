@@ -58,6 +58,18 @@ public class PacketHandler {
                 .encoder(SPacketSyncMemberDataToClient::toBytes)
                 .consumer(SPacketSyncMemberDataToClient::handle)
                 .add();
+
+        net.messageBuilder(SPacketActivatedMechBeacon.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(SPacketActivatedMechBeacon::new)
+                .encoder(SPacketActivatedMechBeacon::toBytes)
+                .consumer(SPacketActivatedMechBeacon::handle)
+                .add();
+
+        net.messageBuilder(SPacketDeactivatedMechBeacon.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(SPacketDeactivatedMechBeacon::new)
+                .encoder(SPacketDeactivatedMechBeacon::toBytes)
+                .consumer(SPacketDeactivatedMechBeacon::handle)
+                .add();
     }
 
     public static int id() {
@@ -80,7 +92,4 @@ public class PacketHandler {
         });
     }
 
-    public static void syncAllClients(Level level, Object packet) {
-
-    }
 }

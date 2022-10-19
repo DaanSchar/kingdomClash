@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import org.daan.kingdomclash.client.data.ClientKingdomData;
+import org.daan.kingdomclash.common.block.powercrystal.PowerCrystal;
 import org.daan.kingdomclash.common.data.kingdom.Kingdom;
 
 import java.util.*;
@@ -29,7 +30,7 @@ public class SPacketSyncKingdomDataToClient {
 
             BlockPos crystalPos = buf.readBlockPos();
             if (!crystalPos.equals(BlockPos.ZERO)) {
-                kingdom.setCrystalPosition(crystalPos);
+                kingdom.setBlockPos(PowerCrystal.class, crystalPos);
             }
             String color = buf.readUtf();
             kingdom.setColor(ChatFormatting.getByName(color));
@@ -44,7 +45,7 @@ public class SPacketSyncKingdomDataToClient {
         for (Kingdom kingdom : kingdoms) {
             buf.writeUtf(kingdom.getName());
             buf.writeInt(kingdom.getLives());
-            BlockPos crystalPos = kingdom.getCrystalPosition().orElse(BlockPos.ZERO);
+            BlockPos crystalPos = kingdom.getBlockPos(PowerCrystal.class).orElse(BlockPos.ZERO);
             buf.writeBlockPos(crystalPos);
             buf.writeUtf(kingdom.getColor().getName());
         }
