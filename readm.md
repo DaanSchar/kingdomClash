@@ -8,12 +8,12 @@ A kingdom is nothing more than a collection of players, like a *team*, with some
 * **Lives**. Your kingdom loses a life when a member dies or gets attacked by an enemy kingdom.
 * **spawn**. All kingdom-members respawn at the same location. Beds are ignored.
 * **Effects**. Bonus effects provided by the **Mechanical Beacon**.
-* **Leader**. *tba*
+* **Leader**. *?*
 
 ## Blocks
 
 ### Mechanical Beacon
-![alt text for screen readers](https://i.imgur.com/iLQUpTG.png "UI in top-left corner")
+![alt text for screen readers](https://i.imgur.com/iLQUpTG.png "Mechanical beacon")
 
 Provides all members of the kingdom with buffs when powered with mechanical power.
 * **Resistance**: level 1 steam-engine at 24 *rpm*
@@ -21,10 +21,11 @@ Provides all members of the kingdom with buffs when powered with mechanical powe
 * **Strength**: level 8 steam-engine at 256 *rpm*
 
 You'll need quite some power to run this machine.
+> These values can be edited in the config.
 
 ### Power Crystal
 
-![alt text for screen readers](https://i.imgur.com/VJ4O3ry.png "UI in top-left corner")
+![alt text for screen readers](https://i.imgur.com/VJ4O3ry.png "Power crystal")
 
 This is the where enemies get the opportunity to destroy your kingdom. Protect it with all you have.
 
