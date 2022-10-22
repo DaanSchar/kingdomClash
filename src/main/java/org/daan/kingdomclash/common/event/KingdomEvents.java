@@ -1,10 +1,12 @@
 package org.daan.kingdomclash.common.event;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.*;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.*;
@@ -45,6 +47,33 @@ public class KingdomEvents {
             Messenger.sendClientError(player, "You can not break a Transformer");
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void mechanicalReinforcerActive(PlayerEvent.BreakSpeed event) {
+        int range = 10;
+        BlockPos blockPos = event.getPos();
+
+        for (int x = -range; x < range; x++) {
+            for (int y = -range; y < range; y++) {
+                for (int z = -range; z < range; z++) {
+                    BlockPos pos = new BlockPos(
+                            blockPos.getX() + x,
+                            blockPos.getY() + y,
+                            blockPos.getZ() + z
+                    );
+
+                    BlockState state = event.getPlayer().level.getBlockState(pos);
+                    if (state.getBlock().equals(KCBlocks.MECHANICAL_REINFORCER.get())) {
+                        float speed = event.getOriginalSpeed();
+                        event.setNewSpeed(speed * 0.5f);
+                    }
+                }
+            }
+        }
+//        if (!event.getState().getBlock().equals(KCBlocks.MECHANICAL_REINFORCER.get())) {
+//            return;
+//        }
     }
 
     @SubscribeEvent
