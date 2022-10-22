@@ -1,4 +1,4 @@
-package org.daan.kingdomclash.common.block.transformer;
+package org.daan.kingdomclash.common.block.mechanicalbeacon;
 
 import com.simibubi.create.content.contraptions.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.ITE;

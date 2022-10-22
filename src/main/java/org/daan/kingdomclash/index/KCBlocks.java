@@ -10,7 +10,7 @@ import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.world.item.CreativeModeTab;
 import org.daan.kingdomclash.common.KingdomClash;
 import org.daan.kingdomclash.common.block.powercrystal.PowerCrystal;
-import org.daan.kingdomclash.common.block.transformer.MechanicalBeacon;
+import org.daan.kingdomclash.common.block.mechanicalbeacon.MechanicalBeacon;
 import org.daan.kingdomclash.common.data.kingdom.KingdomManager;
 
 import static com.simibubi.create.foundation.data.ModelGen.customItemModel;

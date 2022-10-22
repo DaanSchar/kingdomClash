@@ -3,7 +3,7 @@ package org.daan.kingdomclash.index;
 import com.simibubi.create.content.contraptions.base.HalfShaftInstance;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import org.daan.kingdomclash.common.KingdomClash;
-import org.daan.kingdomclash.common.block.transformer.MechanicalBeaconTileEntity;
+import org.daan.kingdomclash.common.block.mechanicalbeacon.MechanicalBeaconTileEntity;
 
 public class KCTileEntities {
 

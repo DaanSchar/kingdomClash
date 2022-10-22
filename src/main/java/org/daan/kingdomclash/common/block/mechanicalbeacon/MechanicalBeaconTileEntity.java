@@ -1,4 +1,4 @@
-package org.daan.kingdomclash.common.block.transformer;
+package org.daan.kingdomclash.common.block.mechanicalbeacon;
 
 import com.simibubi.create.content.contraptions.base.KineticTileEntity;
 import net.minecraft.core.BlockPos;

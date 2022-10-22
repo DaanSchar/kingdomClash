@@ -12,7 +12,7 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.daan.kingdomclash.common.*;
-import org.daan.kingdomclash.common.block.transformer.MechanicalBeacon;
+import org.daan.kingdomclash.common.block.mechanicalbeacon.MechanicalBeacon;
 import org.daan.kingdomclash.common.data.kingdom.*;
 import org.daan.kingdomclash.common.network.PacketHandler;
 import org.daan.kingdomclash.common.network.packets.kingdom.*;
