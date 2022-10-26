@@ -1,4 +1,4 @@
-package org.daan.kingdomclash.common.block.mehcanicalreinforcer;
+package org.daan.kingdomclash.common.block.mechanicalreinforcer;
 
 import com.simibubi.create.content.contraptions.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.ITE;
@@ -6,16 +6,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import org.daan.kingdomclash.index.KCBlockProperties;
 import org.daan.kingdomclash.index.KCTileEntities;
 import org.jetbrains.annotations.Nullable;
 
 public class MechanicalReinforcer extends DirectionalKineticBlock implements ITE<MechanicalReinforcerTileEntity> {
-
     public MechanicalReinforcer(Properties properties) {
         super(properties);
+        this.registerDefaultState(this.defaultBlockState()
+                .setValue(KCBlockProperties.ROTATING, false)
+//                .setValue(KCBlockProperties.IMPACT, 0)
+        );
     }
 
     @Nullable
@@ -50,9 +55,9 @@ public class MechanicalReinforcer extends DirectionalKineticBlock implements ITE
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return KCTileEntities.MECHANICAL_REINFORCER.create(pos, state);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(KCBlockProperties.ROTATING);
+//                .add(KCBlockProperties.IMPACT);
     }
-
-
 }

@@ -4,7 +4,7 @@ import com.simibubi.create.content.contraptions.base.HalfShaftInstance;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import org.daan.kingdomclash.common.KingdomClash;
 import org.daan.kingdomclash.common.block.mechanicalbeacon.MechanicalBeaconTileEntity;
-import org.daan.kingdomclash.common.block.mehcanicalreinforcer.MechanicalReinforcerTileEntity;
+import org.daan.kingdomclash.common.block.mechanicalreinforcer.MechanicalReinforcerTileEntity;
 
 public class KCTileEntities {
 

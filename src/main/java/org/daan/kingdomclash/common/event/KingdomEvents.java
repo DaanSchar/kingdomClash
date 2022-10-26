@@ -1,80 +1,24 @@
 package org.daan.kingdomclash.common.event;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.*;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.*;
-import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.daan.kingdomclash.common.*;
-import org.daan.kingdomclash.common.block.mechanicalbeacon.MechanicalBeacon;
 import org.daan.kingdomclash.common.data.kingdom.*;
 import org.daan.kingdomclash.common.network.PacketHandler;
 import org.daan.kingdomclash.common.network.packets.kingdom.*;
-import org.daan.kingdomclash.index.KCBlocks;
 
 import java.util.Optional;
 
 @Mod.EventBusSubscriber(modid = KingdomClash.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class KingdomEvents {
-
-    @SubscribeEvent
-    public static void onBreakBlock(BlockEvent.BreakEvent event) {
-        var world = event.getWorld();
-        var block = event.getWorld().getBlockState(event.getPos()).getBlock();
-
-        if (world.isClientSide() || !block.equals(KCBlocks.MECHANICAL_BEACON.get())) {
-            return;
-        }
-
-        Player player = event.getPlayer();
-
-        if (player.isCreative()) {
-            KingdomManager.get(player.level).getKingdom(MechanicalBeacon.class, event.getPos()).ifPresent(
-                    kingdom -> Messenger.sendClientSuccess(
-                            player,
-                            "Removed Transformer from " + kingdom.getName()
-                    )
-            );
-        } else {
-            Messenger.sendClientError(player, "You can not break a Transformer");
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void mechanicalReinforcerActive(PlayerEvent.BreakSpeed event) {
-        int range = 10;
-        BlockPos blockPos = event.getPos();
-
-        for (int x = -range; x < range; x++) {
-            for (int y = -range; y < range; y++) {
-                for (int z = -range; z < range; z++) {
-                    BlockPos pos = new BlockPos(
-                            blockPos.getX() + x,
-                            blockPos.getY() + y,
-                            blockPos.getZ() + z
-                    );
-
-                    BlockState state = event.getPlayer().level.getBlockState(pos);
-                    if (state.getBlock().equals(KCBlocks.MECHANICAL_REINFORCER.get())) {
-                        float speed = event.getOriginalSpeed();
-                        event.setNewSpeed(speed * 0.5f);
-                    }
-                }
-            }
-        }
-//        if (!event.getState().getBlock().equals(KCBlocks.MECHANICAL_REINFORCER.get())) {
-//            return;
-//        }
-    }
 
     @SubscribeEvent
     public static void chat(ServerChatEvent event) {

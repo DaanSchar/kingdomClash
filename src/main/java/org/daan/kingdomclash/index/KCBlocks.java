@@ -9,7 +9,7 @@ import com.simibubi.create.foundation.data.SharedProperties;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.world.item.CreativeModeTab;
 import org.daan.kingdomclash.common.KingdomClash;
-import org.daan.kingdomclash.common.block.mehcanicalreinforcer.MechanicalReinforcer;
+import org.daan.kingdomclash.common.block.mechanicalreinforcer.MechanicalReinforcer;
 import org.daan.kingdomclash.common.block.powercrystal.PowerCrystal;
 import org.daan.kingdomclash.common.block.mechanicalbeacon.MechanicalBeacon;
 import org.daan.kingdomclash.common.data.kingdom.KingdomManager;
@@ -50,5 +50,6 @@ public class KCBlocks {
 
         KingdomManager.register(MechanicalBeacon.class);
         KingdomManager.register(PowerCrystal.class);
+        KingdomManager.register(MechanicalReinforcer.class);
     }
 }

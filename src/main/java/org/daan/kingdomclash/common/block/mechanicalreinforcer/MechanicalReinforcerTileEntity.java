@@ -1,25 +1,16 @@
-package org.daan.kingdomclash.common.block.mehcanicalreinforcer;
+package org.daan.kingdomclash.common.block.mechanicalreinforcer;
 
 import com.simibubi.create.content.contraptions.base.KineticTileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.daan.kingdomclash.common.data.kingdom.Kingdom;
-import org.daan.kingdomclash.common.data.kingdom.KingdomManager;
 import org.daan.kingdomclash.common.network.PacketHandler;
 import org.daan.kingdomclash.common.network.packets.kingdom.SPacketActivatedMechBeacon;
 import org.daan.kingdomclash.common.network.packets.kingdom.SPacketDeactivatedMechBeacon;
-import org.daan.kingdomclash.server.config.ServerConfig;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import org.daan.kingdomclash.index.KCBlockProperties;
 
 
 public class MechanicalReinforcerTileEntity extends KineticTileEntity {
@@ -29,19 +20,12 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
     private float lastTickImpact;
     private int tick;
     private final int TICK_THRESH_HOLD = 20;
-    private final int effectDuration = TICK_THRESH_HOLD * 15;
-
-    private final HashMap<MobEffect, Integer> currentEffects;
+    private float impact = 0;
 
     public MechanicalReinforcerTileEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
         this.firstTick = true;
         this.tick = 0;
-        this.currentEffects = new HashMap<>();
-
-        currentEffects.put(MobEffects.DAMAGE_RESISTANCE, ServerConfig.MECHANICAL_BEACON_RESISTANCE_STRESS.get());
-        currentEffects.put(MobEffects.REGENERATION, ServerConfig.MECHANICAL_BEACON_REGENERATION_STRESS.get());
-        currentEffects.put(MobEffects.DAMAGE_BOOST, ServerConfig.MECHANICAL_BEACON_STRENGTH_STRESS.get());
     }
 
     @Override
@@ -52,6 +36,7 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
     @Override
     public void tick() {
         super.tick();
+//        LogUtils.getLogger().info("impact: {}", getBlockState().getValue(KCBlockProperties.IMPACT));
 
         if (tick < TICK_THRESH_HOLD) {
             tick++;
@@ -65,7 +50,7 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
         }
 
         if (isRotating()) {
-            float impact = Math.abs(getSpeed() * STRESS);
+            impact = Math.abs(getSpeed() * STRESS);
             onRotationTick(impact);
 
             if (firstTick) {
@@ -79,6 +64,8 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
 
             if (lastTickImpact != 0) {
                 announceDeactivation();
+                setRotatingInBlockState(false);
+                setChanged();
             }
 
             lastTickImpact = 0;
@@ -90,25 +77,14 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
             return;
         }
 
-        getKingdom(level).ifPresent(
-                kingdom -> {
-                    for (Player player : kingdom.getPlayers(level)) {
-                        if (player != null) {
-                            for (Map.Entry<MobEffect, Integer> entry : currentEffects.entrySet()) {
-                                int minImpact = entry.getValue();
-                                MobEffect effect = entry.getKey();
-
-                                if (impact >= minImpact) {
-                                    player.addEffect(getInstance(effect));
-                                }
-                            }
-                        }
-                    }
-                }
-        );
+        if (!getBlockState().getValue(KCBlockProperties.ROTATING)) {
+            setRotatingInBlockState(true);
+        }
 
         if (impact != lastTickImpact) {
+            setChanged();
         }
+
     }
 
     private void onFirstTick() {
@@ -129,15 +105,21 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
             return;
         }
 
-        getKingdom(level).ifPresent(
-                kingdom -> {
-                    for (Player player : kingdom.getPlayers(level)) {
-                        if (player instanceof ServerPlayer serverPlayer) {
-                            PacketHandler.sendToPlayer(message, serverPlayer);
-                        }
-                    }
-                }
-        );
+//        getKingdom(level).ifPresent(
+//                kingdom -> {
+//                    for (Player player : kingdom.getPlayers(level)) {
+//                        if (player instanceof ServerPlayer serverPlayer) {
+//                            PacketHandler.sendToPlayer(message, serverPlayer);
+//                        }
+//                    }
+//                }
+//        );
+
+        for (Player player : level.players()) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                PacketHandler.sendToPlayer(message, serverPlayer);
+            }
+        }
     }
 
     public boolean isRotating() {
@@ -152,16 +134,9 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
         return !level.isClientSide;
     }
 
-    private MobEffectInstance getInstance(MobEffect effect) {
-        return new MobEffectInstance(effect, effectDuration);
+    private void setRotatingInBlockState(boolean rotating) {
+        this.level.setBlock(getBlockPos(), this.getBlockState().setValue(KCBlockProperties.ROTATING, rotating), 3);
     }
 
-    private Optional<Kingdom> getKingdom(Level level) {
-        if (!isValid(level)) {
-            return Optional.empty();
-        }
-
-        return KingdomManager.get(level).getKingdom(MechanicalReinforcer.class, getBlockPos());
-    }
 
 }

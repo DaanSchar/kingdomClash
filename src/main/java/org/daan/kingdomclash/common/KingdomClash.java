@@ -16,6 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.daan.kingdomclash.index.KCBlockProperties;
 import org.daan.kingdomclash.index.KCTileEntities;
 import org.daan.kingdomclash.common.data.DataEvents;
 import org.daan.kingdomclash.common.network.PacketHandler;
@@ -58,6 +59,7 @@ public class KingdomClash
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+        KCBlockProperties.register();
         KCBlocks.register();
         KCTileEntities.register();
     }
