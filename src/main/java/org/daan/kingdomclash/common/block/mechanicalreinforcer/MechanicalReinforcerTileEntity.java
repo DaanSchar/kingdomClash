@@ -7,10 +7,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import org.daan.kingdomclash.client.events.DirectionalBlockArea;
 import org.daan.kingdomclash.common.network.PacketHandler;
-import org.daan.kingdomclash.common.network.packets.kingdom.SPacketActivatedMechBeacon;
-import org.daan.kingdomclash.common.network.packets.kingdom.SPacketDeactivatedMechBeacon;
+import org.daan.kingdomclash.common.network.packets.kingdom.*;
 import org.daan.kingdomclash.index.KCBlockProperties;
+
+import java.util.Optional;
 
 
 public class MechanicalReinforcerTileEntity extends KineticTileEntity {
@@ -36,7 +39,6 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
     @Override
     public void tick() {
         super.tick();
-//        LogUtils.getLogger().info("impact: {}", getBlockState().getValue(KCBlockProperties.IMPACT));
 
         if (tick < TICK_THRESH_HOLD) {
             tick++;
@@ -137,6 +139,18 @@ public class MechanicalReinforcerTileEntity extends KineticTileEntity {
     private void setRotatingInBlockState(boolean rotating) {
         this.level.setBlock(getBlockPos(), this.getBlockState().setValue(KCBlockProperties.ROTATING, rotating), 3);
     }
+
+    public Optional<AABB> getArea() {
+        float impact = Math.abs(calculateStressApplied() * getSpeed());
+
+        if (getSpeed() == 0) {
+            return Optional.empty();
+        }
+
+        int range = (int) (Math.sqrt(impact) / 10d);
+        return Optional.of(new DirectionalBlockArea(getBlockPos(), level, range).getArea());
+    }
+
 
 
 }

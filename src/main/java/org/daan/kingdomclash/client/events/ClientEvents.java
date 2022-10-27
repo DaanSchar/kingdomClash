@@ -1,6 +1,16 @@
 package org.daan.kingdomclash.client.events;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector4f;
+import com.simibubi.create.content.contraptions.goggles.GogglesItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
@@ -26,8 +36,9 @@ public class ClientEvents {
     @SubscribeEvent
     public static void reinforcerBreakEvent(PlayerEvent.BreakSpeed event) {
         float speedScalar = 0.5f;
+        Level level = event.getPlayer().level;
 
-        if (!event.getPlayer().level.isClientSide) {
+        if (!level.isClientSide) {
             return;
         }
 
@@ -38,18 +49,18 @@ public class ClientEvents {
                 return;
             }
 
-            Level level = event.getPlayer().level;
             BlockPos breakPosition = event.getPos();
             var entity = level.getBlockEntity(reinforcer.get());
 
             if (entity instanceof MechanicalReinforcerTileEntity tileEntity) {
                 float impact = Math.abs(tileEntity.calculateStressApplied() * tileEntity.getSpeed());
-                boolean isRotating = tileEntity.getSpeed() > 0;
+                boolean isRotating = Math.abs(tileEntity.getSpeed()) > 0;
                 int range = (int) (Math.sqrt(impact) / 10d);
 
                 boolean playerInKingdom = ClientKingdomData.getPlayerKingdom().map(
                         playerKingdom -> playerKingdom.equals(kingdom)
                 ).orElse(false);
+                playerInKingdom = false; // TODO REMOVE THIS LINE IN PRODUCTION
 
                 if (isRotating && !playerInKingdom) {
                     DirectionalBlockArea area = new DirectionalBlockArea(reinforcer.get(), level, range);
@@ -66,28 +77,36 @@ public class ClientEvents {
 
 
     @SubscribeEvent
-    public static void bruh(RenderLevelLastEvent event) {
-        ClientKingdomData.getPlayerKingdom().ifPresent(
-                kingdom -> {
-                    var reinforcer = kingdom.getBlockPos(MechanicalReinforcer.class);
+    public static void renderReinforcedArea(RenderLevelLastEvent event) {
+        var kingdom = ClientKingdomData.getPlayerKingdom();
 
-                    if (reinforcer.isEmpty()) {
-                        return;
-                    }
+        if (kingdom.isEmpty()) {
+            return;
+        }
 
-                    Vec3 pos = new Vec3(
-                            reinforcer.get().getX(),
-                            reinforcer.get().getY(),
-                            reinforcer.get().getZ()
-                    );
+        var reinforcer = kingdom.get().getBlockPos(MechanicalReinforcer.class);
+        Level level = Minecraft.getInstance().level;
 
-                    RenderLines.drawLineBox(
-                            event.getPoseStack(),
-                            AABB.unitCubeFromLowerCorner(pos),
-                            1, 1, 1, 1
-                    );
-                }
-        );
+        if (reinforcer.isEmpty() || level == null) {
+            return;
+        }
+
+        var entity = level.getBlockEntity(reinforcer.get());
+
+        if (entity instanceof MechanicalReinforcerTileEntity tileEntity) {
+            var area = tileEntity.getArea();
+
+            if (area.isEmpty()) {
+                return;
+            }
+
+            boolean wearingGoggles = GogglesItem.isWearingGoggles(Minecraft.getInstance().player);
+
+            if (wearingGoggles) {
+                renderCube(area.get(), event.getPoseStack(), new Vector4f(1f, 1f, 1f, 1f), true);
+                renderBlock(reinforcer.get(), event.getPoseStack(), new Vector4f(0.85f, 0.7f, 0f, 0.8f));
+            }
+        }
     }
 
         @SubscribeEvent
@@ -110,6 +129,44 @@ public class ClientEvents {
 //        {
 //            event.setCanceled(true);
 //        }
+    }
+
+    private static void renderBlock(BlockPos blockPos, PoseStack pose, Vector4f color) {
+        renderCube(
+                new AABB(
+                        blockPos.getX(),
+                        blockPos.getY(),
+                        blockPos.getZ(),
+                        blockPos.getX() + 1,
+                        blockPos.getY() + 1,
+                        blockPos.getZ() + 1
+                ),
+                pose,
+                color,
+                false
+        );
+    }
+
+    private static void renderCube(AABB cube, PoseStack pose, Vector4f color, boolean depthMask) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        pose.pushPose();
+
+        Vec3 vec = camera.getPosition();
+        pose.translate(-vec.x, -vec.y, -vec.z);
+
+        MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        VertexConsumer vc = buffer.getBuffer(RenderType.lines());
+
+        RenderSystem.depthMask(depthMask);
+
+        LevelRenderer.renderLineBox(
+                pose,
+                vc,
+                cube,
+                color.x(), color.y(), color.z(), color.w()
+        );
+
+        pose.popPose();
     }
 
     private static void givePlayerBreakFeedback(Player player, BlockPos blockpos) {

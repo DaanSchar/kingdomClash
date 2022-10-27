@@ -1,21 +1,20 @@
 package org.daan.kingdomclash.client.events;
 
 import net.minecraft.core.*;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 
+
+/**
+ * Cube Area in front of a directionalBlock.
+ */
 public class DirectionalBlockArea {
 
     private final BlockPos directionalBlockPosition;
     private final Level level;
     private final int size;
-    private static final boolean RENDER_TO_PLAYER = true;
 
-    /**
-     * Cube Area in front of a directionalBlock.
-     * Only works if block is horizontally directed.
-     */
     public DirectionalBlockArea(BlockPos directionalBlockPosition, Level level, int size) {
         this.directionalBlockPosition = directionalBlockPosition;
         this.level = level;
@@ -26,86 +25,85 @@ public class DirectionalBlockArea {
      * Checks if a position is inside the Cube area.
      */
     public boolean isInArea(BlockPos blockPos) {
-        if (isOnYAxis()) {
-            return false;
-        }
+        AABB area = getArea();
 
-        boolean inRange = false;
+        float x = blockPos.getX();
+        float y = blockPos.getY();
+        float z = blockPos.getZ();
 
-        for (int i = 0; i < this.size; i++) {
-            for (int j = 0; j < this.size; j++) {
-                if (isInArea(i, j, blockPos)) {
-
-                    // instead of returning true, we save the bool value so that
-                    // both loops finish. That way renderPos gets called for each position in the area.
-                    inRange = true;
-                }
+        if (x >= area.minX && x < area.maxX) {
+            if (y >= area.minY && y < area.maxY) {
+                return z >= area.minZ && z < area.maxZ;
             }
         }
 
-        return inRange;
+        return false;
     }
 
-    private boolean isInArea(int i, int j, BlockPos blockPos) {
+    public AABB getArea() {
         Direction facing = getReinforcerDirection();
 
-        int x = directionalBlockPosition.getX();
-        int z = directionalBlockPosition.getZ();
+        int offset = (size / 2);
+        BlockPos pos = this.directionalBlockPosition;
+        double yMin = pos.getY() - offset;
+        double yMax = pos.getY() + offset + 1d;
 
-        if (isOnZAxis()) {
-            z -= (i + 1) * facing.getStepZ();
-            x -= -(size / 2) + j;
-        } else if (isOnXAxis()) {
-            x -= (i + 1) * facing.getStepX();
-            z -= -(size / 2) + j;
-        }
+        return switch (facing) {
+            case NORTH -> new AABB(
+                    pos.getX() - offset,
+                    yMin,
+                    pos.getZ() + 1,
+                    pos.getX() + offset + 1,
+                    yMax,
+                    pos.getZ() + this.size + 1
+            );
+            case SOUTH -> new AABB(
+                    pos.getX() - offset,
+                    yMin,
+                    pos.getZ(),
+                    pos.getX() + offset + 1,
+                    yMax,
+                    pos.getZ() - this.size - 1
+            );
+            case WEST -> new AABB(
+                    pos.getX() + 1,
+                    yMin,
+                    pos.getZ() - offset,
+                    pos.getX() + this.size + 1,
+                    yMax,
+                    pos.getZ() + offset + 1
+            );
+            case EAST -> new AABB(
+                    pos.getX(),
+                    yMin,
+                    pos.getZ() - offset,
+                    pos.getX() - this.size,
+                    yMax,
+                    pos.getZ() + offset + 1
+            );
+            case DOWN -> new AABB(
+                    pos.getX() - offset,
+                    pos.getY() + 1,
+                    pos.getZ() - offset,
 
-        if (RENDER_TO_PLAYER) {
-            renderPos(new BlockPos(x, blockPos.getY(), z));
-        }
+                    pos.getX() + offset + 1,
+                    pos.getY() + this.size + 1,
+                    pos.getZ() + offset + 1
+            );
+            case UP -> new AABB(
+                    pos.getX() - offset,
+                    pos.getY(),
+                    pos.getZ() - offset,
 
-        return (x == blockPos.getX()) && (z == blockPos.getZ()) &&
-                (blockPos.getY() - directionalBlockPosition.getY() <= size);
-    }
-
-    private boolean isOnZAxis() {
-        return getReinforcerDirection().getStepZ() != 0;
-    }
-
-    private boolean isOnXAxis() {
-        return getReinforcerDirection().getStepX() != 0;
-    }
-
-    private boolean isOnYAxis() {
-        return getReinforcerDirection().getStepY() != 0;
+                    pos.getX() + offset + 1,
+                    pos.getY() - this.size - 1,
+                    pos.getZ() + offset + 1
+            );
+        };
     }
 
     private Direction getReinforcerDirection() {
         return this.level.getBlockState(this.directionalBlockPosition).getValue(BlockStateProperties.FACING);
-    }
-
-    // visual stuff
-
-    private void renderPos(BlockPos pos) {
-        spawnSoulParticles(this.level, pos);
-    }
-
-    private static void spawnSoulParticles(Level level, BlockPos position) {
-        for (int i = 0; i < 1; i++) {
-            level.addParticle(
-                    ParticleTypes.SMOKE,
-                    position.getX() + 0.5d + rand(),
-                    position.getY() + 0.5d + rand(),
-                    position.getZ() + 0.5d + rand(),
-                    Math.cos(i) * (rand() / 10d),
-                    0.2 + rand() / 10.0,
-                    Math.sin(i) * (rand() / 10d)
-            );
-        }
-    }
-
-    private static double rand() {
-        return ((Math.random() * 2) - 1) / 2.0;
     }
 
 }
