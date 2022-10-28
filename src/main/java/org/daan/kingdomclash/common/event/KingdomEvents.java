@@ -8,44 +8,17 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.event.*;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.*;
-import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.daan.kingdomclash.common.*;
-import org.daan.kingdomclash.common.block.mechanicalbeacon.MechanicalBeacon;
 import org.daan.kingdomclash.common.data.kingdom.*;
 import org.daan.kingdomclash.common.network.PacketHandler;
 import org.daan.kingdomclash.common.network.packets.kingdom.*;
-import org.daan.kingdomclash.index.KCBlocks;
 
 import java.util.Optional;
 
 @Mod.EventBusSubscriber(modid = KingdomClash.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class KingdomEvents {
-
-    @SubscribeEvent
-    public static void onBreakBlock(BlockEvent.BreakEvent event) {
-        var world = event.getWorld();
-        var block = event.getWorld().getBlockState(event.getPos()).getBlock();
-
-        if (world.isClientSide() || !block.equals(KCBlocks.MECHANICAL_BEACON.get())) {
-            return;
-        }
-
-        Player player = event.getPlayer();
-
-        if (player.isCreative()) {
-            KingdomManager.get(player.level).getKingdom(MechanicalBeacon.class, event.getPos()).ifPresent(
-                    kingdom -> Messenger.sendClientSuccess(
-                            player,
-                            "Removed Transformer from " + kingdom.getName()
-                    )
-            );
-        } else {
-            Messenger.sendClientError(player, "You can not break a Transformer");
-            event.setCanceled(true);
-        }
-    }
 
     @SubscribeEvent
     public static void chat(ServerChatEvent event) {

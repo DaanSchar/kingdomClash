@@ -1,7 +1,6 @@
 package org.daan.kingdomclash.client.data;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.world.entity.player.Player;
@@ -19,8 +18,6 @@ public class ClientKingdomData {
     }
 
     public static List<Kingdom> getKingdoms() {
-        kingdoms.sort(Comparator.comparingInt(Kingdom::getLives).reversed());
-
         return kingdoms;
     }
 
@@ -60,6 +57,10 @@ public class ClientKingdomData {
         }
 
         return false;
+    }
+
+    public static Optional<Kingdom> getPlayerKingdom() {
+        return getPlayer().flatMap(player -> getKingdom(player.getGameProfile()));
     }
 
     public static Optional<Player> getPlayer() {
