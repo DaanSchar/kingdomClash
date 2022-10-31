@@ -16,6 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.daan.kingdomclash.common.mobs.KCMobs;
 import org.daan.kingdomclash.index.KCBlockProperties;
 import org.daan.kingdomclash.index.KCTileEntities;
 import org.daan.kingdomclash.common.data.DataEvents;
@@ -43,6 +44,7 @@ public class KingdomClash
 //        ModBlocks.register(eventBus);
 //        ModItems.register(eventBus);
 //        ModEffects.register(eventBus);
+        KCMobs.ENTITIES.register(eventBus);
 
         eventBus.addListener(this::setup);
         eventBus.addListener(this::enqueueIMC);

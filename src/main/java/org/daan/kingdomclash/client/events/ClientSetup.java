@@ -24,5 +24,4 @@ public class ClientSetup {
         LogUtils.getLogger().info("REGISTERED CLIENT SIDE STUFF");
     }
 
-
 }

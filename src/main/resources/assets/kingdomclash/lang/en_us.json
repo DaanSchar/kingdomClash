@@ -3,5 +3,6 @@
 
   "block.kingdomclash.power_crystal_block": "Power Crystal",
   "block.kingdomclash.mechanical_beacon": "Mechanical Beacon",
-  "key.kingdomclash.example_key": "Example Key"
+  "key.kingdomclash.example_key": "Example Key",
+  "entity.kingdomclash.example_entity": "Example Entity"
 }
